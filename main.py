@@ -1,7 +1,9 @@
 import pandas as pd
 import os
-#import time
+import time
 from datetime import datetime
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 def read_selected_excel_columns(file_path, columns_to_select=None):
     try:
@@ -46,25 +48,61 @@ def process_excel_file(file_path, target_columns):
         print("An error occurred.")
         return None
 
-def monitor_folder(folder_path, target_columns, check_interval=60):
-    processed_files = set()
-    print(f"'{folder_path}' folder is watching...")
+class ExcelHandler(FileSystemEventHandler):
+    def __init__(self, target_columns):
+        self.target_columns = target_columns
+        self.processed_files = set()
+
+    def on_created(self, event):
+        if event.is_directory:
+            return
+
+        file_path = event.src_path
+        if file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+            time.sleep(1)
+
+            print(f"\nNew excel file detected: {file_path}")
+
+            try:
+                if os.path.exists(file_path) and os.access(file_path, os.R_OK):
+                    if file_path not in self.processed_files:
+                        df = process_excel_file(file_path, self.target_columns)
+                        if df is not None:
+                            self.processed_files.add(file_path)
+                    else:
+                        print(f"File already processed: {file_path}")
+                else:
+                    print(f"File is not accessible yet: {file_path}")
+            except Exception as e:
+                print(f"Error handling newly created a file: {e}")
+
+def start_monitoring(folder_path, target_columns):
+    print(f"Starting monitoring of folder: {folder_path}")
+    print(f"Using watchdog to detect new Excel files.")
+    print("Press Ctrl+C to stop monitoring.")
+
+    event_handler = ExcelHandler(target_columns)
+    observer = Observer()
+    observer.schedule(event_handler, folder_path, recursive=False)
+    observer.start()
 
     try:
-        excel_files = [f for f in os.listdir(folder_path)
-                       if f.endswith('.xlsx') or f.endswith('.xls')]
+        print("Checking for existing Excel Files...")
+        for file in os.listdir(folder_path):
+            if file.endswith('.xlsx') or file.endswith('.xls'):
+                file_path = os.path.join(folder_path, file)
+                if file_path not in event_handler.processed_files:
+                    print(f"Found existing Excel File: {file}")
+                    df = process_excel_file(file_path, target_columns)
 
-        for file in excel_files:
-            file_path = os.path.join(folder_path, file)
+        print("\nMonitoring for new files... Press Ctrl+C to stop.")
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nStopping monitoring. Exiting...")
+        observer.stop()
 
-            df = process_excel_file(file_path, target_columns)
-            if df is not None:
-                processed_files.add(file_path)
-
-        #time.sleep(check_interval)
-
-    except Exception as e:
-        print(f"An error occurred when folder is watching: {e}")
+    observer.join()
 
 if __name__ == "__main__":
     excel_folder = "Excel Files"
@@ -91,7 +129,7 @@ if __name__ == "__main__":
         "cid"
     ]
 
-    file_path = os.path.join(excel_folder, "Outscraper.xlsx")
-    df = process_excel_file(file_path, target_columns)
+    #file_path = os.path.join(excel_folder, "Outscraper.xlsx")
+    #df = process_excel_file(file_path, target_columns)
 
-    #monitor_folder(excel_folder,target_columns)
+    start_monitoring(excel_folder, target_columns)
