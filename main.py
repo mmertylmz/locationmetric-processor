@@ -13,6 +13,7 @@ def read_excel_columns(file_path):
         print(f"Error: '{file_path}' file could not found.")
     except Exception as e:
         print(f"An error occurred: '{e}'")
+
     return ""
 
 
