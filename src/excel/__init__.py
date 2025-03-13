@@ -1,0 +1,3 @@
+"""
+Excel operations module.
+"""
