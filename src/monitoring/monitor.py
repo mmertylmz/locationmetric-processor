@@ -11,7 +11,6 @@ class FolderMonitor:
         self.observer = None
 
     def start(self):
-        """Start monitoring the folder."""
         print(f"Starting monitoring of folder: {self.folder_path}")
         print("Using watchdog to detect new Excel files.")
         print("Press Ctrl+C to stop monitoring.")
