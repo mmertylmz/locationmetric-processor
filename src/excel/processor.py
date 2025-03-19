@@ -133,14 +133,15 @@ class ExcelProcessor:
                     df[col] = df[col].apply(lambda x: 0 if not isinstance(x, (int, float)) or pd.isna(x) else int(x))
                     df[col] = df[col].astype(int)
 
-            if 'verified' in df.columns:
-                df['verified'] = df['verified'].fillna(False)
-                if df['verified'].dtype == 'object':
-                    df['verified'] = df['verified'].apply(
-                        lambda x: True if str(x).lower() == 'true' else False
-                    )
 
-            # Posta kodu özel işleme
+            if 'verified' in df.columns:
+                df['verified'] = pd.to_numeric(df['verified'], errors='coerce')
+                df['verified'] = df['verified'].fillna(0)
+                df['verified'] = df['verified'].apply(lambda x: bool(x) if isinstance(x, (int, float)) else False)
+
+                logging.info(f"Verified column processed. True count: {df['verified'].sum()}, "
+                             f"False count: {len(df) - df['verified'].sum()}")
+
             if 'postal_code' in df.columns:
                 df['postal_code'] = df['postal_code'].fillna('')
                 df['postal_code'] = df['postal_code'].astype(str)
