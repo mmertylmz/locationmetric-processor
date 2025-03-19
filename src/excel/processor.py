@@ -88,13 +88,6 @@ class ExcelProcessor:
 
         try:
             for _, row in batch_df.iterrows():
-                cid = row.get('cid')
-                if cid and isinstance(cid, str):
-                    try:
-                        cid = int(cid)
-                    except ValueError:
-                        cid = None
-
                 google_id = row.get('google_id')
                 existing_location = None
 
@@ -141,7 +134,6 @@ class ExcelProcessor:
                         MetricId=metric_id,
                         PlaceId=row.get('place_id'),
                         GoogleId=google_id,
-                        CId=cid,
                         Name=row.get('name'),
                         Type=row.get('type'),
                         Phone=row.get('phone'),
