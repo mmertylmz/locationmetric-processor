@@ -36,7 +36,7 @@ class OutscraperLocation(Base):
                                foreign_keys=[MetricId])
 
     def __repr__(self):
-        return f"<OutscraperLocation(Id={self.Id}, Name={self.Name})>"  # Son parantez eksikti, düzeltildi
+        return f"<OutscraperLocation(Id={self.Id}, Name={self.Name})>"
 
 class OutscraperLocationMetric(Base):
     __tablename__ = "rmertDLMOutscraperLocationMetric"

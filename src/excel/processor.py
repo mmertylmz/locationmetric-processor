@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..database.database import get_session
 from ..database.models import OutscraperLocation, OutscraperLocationMetric
 from config import EXCEL_CONFIG, TARGET_COLUMNS
+from ..utils.helpers import ensure_directory_exists, get_timestamp
 
 
 class ExcelProcessor:
@@ -20,8 +21,7 @@ class ExcelProcessor:
         import sys
 
         log_folder = LOG_CONFIG['log_folder']
-        if not os.path.exists(log_folder):
-            os.makedirs(log_folder)
+        ensure_directory_exists(log_folder)
 
         log_file = os.path.join(log_folder, f"{datetime.now().strftime('%Y-%m-%d')}.log")
 
@@ -75,6 +75,7 @@ class ExcelProcessor:
             self.move_processed_file(file_path)
 
             return True
+
         except Exception as e:
             logging.error(f"Error processing file {file_path}: {e}")
             return False
@@ -197,9 +198,7 @@ class ExcelProcessor:
         new_file_name = f"{timestamp}_{file_name}"
 
         archive_folder = EXCEL_CONFIG['archive_folder']
-
-        if not os.path.exists(archive_folder):
-            os.makedirs(archive_folder)
+        ensure_directory_exists(archive_folder)
 
         new_path = os.path.join(archive_folder, new_file_name)
         os.rename(file_path, new_path)
@@ -207,9 +206,7 @@ class ExcelProcessor:
 
     def watch_folder(self):
         watch_folder = EXCEL_CONFIG['watch_folder']
-        if not os.path.exists(watch_folder):
-            os.makedirs(watch_folder)
-            logging.info(f"Watch folder created: {watch_folder}")
+        ensure_directory_exists(watch_folder)
 
         excel_files = [f for f in os.listdir(watch_folder) if f.endswith(('.xlsx', '.xls')) and
                        os.path.isfile(os.path.join(watch_folder, f))]

@@ -25,7 +25,7 @@ def get_engine():
 
     return create_engine(
         connection_url,
-        echo = True,    # True, for logging SQL Commands
+        echo = False,    # True, for logging SQL Commands
         pool_pre_ping = True,
         pool_recycle = True,
         use_setinputsizes=False #OleDB Error (pyodbc.Error) ('HY104', '[HY104] [Microsoft][ODBC SQL Server Driver]Invalid precision value (0) (SQLBindParameter)')

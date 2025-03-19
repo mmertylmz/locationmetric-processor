@@ -1,17 +1,17 @@
 import logging
 import sys
 from src.excel.processor import ExcelProcessor
-#from src.database import test_mssql_connection
+from src.database.test_mssql_connection import test_mssql_connection
 from config import TARGET_COLUMNS
 
 if __name__ == "__main__":
-    processor = ExcelProcessor(batch_size=100)
+    processor = ExcelProcessor(batch_size=50)
 
     logging.info("Program starting...")
 
-    #if not test_mssql_connection():
-     #   logging.error("Database connection failed! Exiting program.")
-      #  sys.exit(1)
+    if not test_mssql_connection():
+        logging.error("Database connection failed! Exiting program.")
+        sys.exit(1)
 
     logging.info("Starting to process Excel files...")
     processed_count = processor.watch_folder()

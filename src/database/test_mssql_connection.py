@@ -1,10 +1,14 @@
 import pyodbc
+from config import DB_CONFIG
+
+def get_connection_string(database_name="WR"):
+    if DB_CONFIG.get("trusted_connection").lower() == "yes":
+        return f"DRIVER={{{DB_CONFIG['driver']}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};Trusted_Connection=yes;"
+
+    return f"DRIVER={{{DB_CONFIG('driver')}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};UID={DB_CONFIG['username']};PWD={DB_CONFIG['password']};"
 
 def test_mssql_connection():
-    server = r"DESKTOP-RHIE06K\SQLEXPRESS"
-    database = "WR"
-
-    connection_string = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
+    connection_string = get_connection_string("WR")
 
     try:
         conn = pyodbc.connect(connection_string)
