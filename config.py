@@ -30,8 +30,8 @@ DB_CONFIG = {
 }
 
 EXCEL_CONFIG = {
-    'watch_folder': './Excel Files',
-    'archive_folder': './Excel Files/Archives',
+    'watch_folder': './excel_files',
+    'archive_folder': './Excel Files/archives',
 }
 
 LOG_CONFIG = {
