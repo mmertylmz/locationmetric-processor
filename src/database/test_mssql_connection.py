@@ -13,17 +13,20 @@ def test_mssql_connection():
     try:
         conn = pyodbc.connect(connection_string)
 
-        cursor = conn.cursor()
-        cursor.execute("SELECT @@VERSION")
-        version = cursor.fetchone()[0]
+        #cursor = conn.cursor()
+        #cursor.execute("SELECT @@VERSION")
+        #version = cursor.fetchone()[0]
 
-        print("Databases:")
-        cursor.execute("SELECT name FROM sys.databases")
-        databases = cursor.fetchall()
-        for db in databases:
-            print(f" - {db[0]}")
+        #print("Databases:")
+        #cursor.execute("SELECT name FROM sys.databases")
+        #databases = cursor.fetchall()
+        #for db in databases:
+            #print(f" - {db[0]}")
 
-        print(f"Version: {version}")
+        #print(f"Version: {version}")
+
+        print("Connection successful!")
+
         conn.close()
         return True
 

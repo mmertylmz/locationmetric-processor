@@ -7,8 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..database.database import get_session
 from ..database.models import OutscraperLocation, OutscraperLocationMetric
 from config import EXCEL_CONFIG, TARGET_COLUMNS, DTYPE_DICT
-from ..utils.helpers import ensure_directory_exists
-
+from ..utils.helpers import ensure_directory_exists, clean_data_frame
 
 class ExcelProcessor:
     def __init__(self, batch_size=100):
@@ -52,7 +51,7 @@ class ExcelProcessor:
 
             df = df[[col for col in TARGET_COLUMNS if col in df.columns]]
 
-            df = self.clean_data_frame(df)
+            df = clean_data_frame(df)
 
             logging.info(f"File cleaned successfully: {file_path}, {len(df)} rows found.")
 
@@ -100,59 +99,6 @@ class ExcelProcessor:
         except Exception as e:
             logging.error(f"Error processing file {file_path}: {e}")
             return False
-
-    def clean_data_frame(self, df):
-        try:
-            string_columns = ['name', 'type', 'phone', 'full_address', 'state',
-                              'location_link', 'place_id', 'google_id']
-
-            for col in string_columns:
-                if col in df.columns:
-                    df[col] = df[col].fillna('')
-                    df[col] = df[col].astype(str)
-                    df[col] = df[col].replace(r'\.0$', '', regex=True)
-                    df[col] = df[col].replace({'nan': '', 'None': '', 'NaN': ''})
-
-            float_columns = ['latitude', 'longitude', 'rating']
-            for col in float_columns:
-                if col in df.columns:
-                    df[col] = pd.to_numeric(df[col], errors='coerce')
-                    df[col] = df[col].fillna(0.0)
-                    df[col] = df[col].apply(
-                        lambda x: 0.0 if not isinstance(x, (int, float)) or pd.isna(x) else float(x))
-                    df[col] = df[col].astype(float)
-
-            int_columns = ['reviews', 'reviews_per_score_1', 'reviews_per_score_2',
-                           'reviews_per_score_3', 'reviews_per_score_4',
-                           'reviews_per_score_5', 'photos_count', 'cid']
-
-            for col in int_columns:
-                if col in df.columns:
-                    df[col] = pd.to_numeric(df[col], errors='coerce')
-                    df[col] = df[col].fillna(0)
-                    df[col] = df[col].apply(lambda x: 0 if not isinstance(x, (int, float)) or pd.isna(x) else int(x))
-                    df[col] = df[col].astype(int)
-
-
-            if 'verified' in df.columns:
-                df['verified'] = pd.to_numeric(df['verified'], errors='coerce')
-                df['verified'] = df['verified'].fillna(0)
-                df['verified'] = df['verified'].apply(lambda x: bool(x) if isinstance(x, (int, float)) else False)
-
-                logging.info(f"Verified column processed. True count: {df['verified'].sum()}, "
-                             f"False count: {len(df) - df['verified'].sum()}")
-
-            if 'postal_code' in df.columns:
-                df['postal_code'] = df['postal_code'].fillna('')
-                df['postal_code'] = df['postal_code'].astype(str)
-                df['postal_code'] = df['postal_code'].replace(r'\.0$', '', regex=True)
-                df['postal_code'] = df['postal_code'].replace({'nan': '', 'None': '', 'NaN': ''})
-
-            return df
-
-        except Exception as e:
-            logging.error(f"Error cleaning data frame: {e}")
-            return df
 
     def _process_batch(self, batch_df):
         session = get_session()
@@ -215,8 +161,6 @@ class ExcelProcessor:
                     state = str(row.get('state', ''))
                     location_link = str(row.get('location_link', ''))
                     place_id = str(row.get('place_id', ''))
-
-                    # Boolean değerinden emin ol
                     verified = bool(row.get('verified', False))
 
                     metric_id = uuid.uuid4()
@@ -370,72 +314,4 @@ class ExcelProcessor:
                 logging.error(f"Unhandled exception processing file {file_path}: {e}")
 
         logging.info(f"Watch folder processing complete. Processed: {files_processed}, Failed: {files_failed}")
-        return files_processed
-
-    def format_phone_number(self, phone_value):
-        if pd.isna(phone_value) or phone_value == '':
-            return ''
-
-        if isinstance(phone_value, (float, int)):
-            phone_str = str(int(phone_value)) if phone_value == int(phone_value) else str(phone_value)
-        else:
-            phone_str = str(phone_value)
-
-        if phone_str.endswith('.0'):
-            phone_str = phone_str[:-2]
-
-        if phone_str.lower() in ['nan', 'none']:
-            return ''
-
-        return phone_str
-
-    def clean_decimal(self, value, precision=19, scale=4):
-        if pd.isna(value):
-            return 0.0
-
-        try:
-            float_value = float(value)
-            if not (float_value == float_value):
-                return 0.0
-
-            max_value = 10 ** (precision - scale) - 10 ** (-scale)
-            if abs(float_value) > max_value:
-                return 0.0
-
-            return round(float_value, scale)
-        except:
-            return 0.0
-
-    def clean_integer(self, value):
-        if pd.isna(value):
-            return 0
-
-        try:
-            int_value = int(float(value))
-            return int_value
-        except:
-            return 0
-
-    def process_files_in_folder(self, folder_path=None):
-        if folder_path is None:
-            folder_path = EXCEL_CONFIG['watch_folder']
-
-        ensure_directory_exists(folder_path)
-
-        excel_files = [f for f in os.listdir(folder_path) if f.endswith(('.xlsx', '.xls')) and
-                       os.path.isfile(os.path.join(folder_path, f))]
-
-        if not excel_files:
-            logging.info(f"No Excel files found in folder: {folder_path}")
-            return 0
-
-        logging.info(f"Found {len(excel_files)} Excel files in folder: {folder_path}")
-
-        files_processed = 0
-
-        for file in excel_files:
-            file_path = os.path.join(folder_path, file)
-            if self.process_file(file_path):
-                files_processed += 1
-
         return files_processed
