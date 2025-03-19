@@ -1,4 +1,5 @@
 import pandas as pd
+from config import TARGET_COLUMNS
 
 class ExcelReader:
     @staticmethod
@@ -31,3 +32,8 @@ class ExcelReader:
             print(f"An error occurred: '{e}'")
 
         return None
+
+
+if __name__ == '__main__':
+    excelReader = ExcelReader()
+    excelReader.read_selected_columns("../../excel_files/Outscraper.xlsx", TARGET_COLUMNS)

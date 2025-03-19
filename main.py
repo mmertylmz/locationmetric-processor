@@ -2,7 +2,6 @@ import logging
 import sys
 from src.excel.processor import ExcelProcessor
 from src.database.test_mssql_connection import test_mssql_connection
-from config import TARGET_COLUMNS
 
 if __name__ == "__main__":
     processor = ExcelProcessor(batch_size=50)
