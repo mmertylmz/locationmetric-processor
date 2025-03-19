@@ -31,7 +31,7 @@ DB_CONFIG = {
 
 EXCEL_CONFIG = {
     'watch_folder': './excel_files',
-    'archive_folder': './Excel Files/archives',
+    'archive_folder': './excel_files/archives',
 }
 
 LOG_CONFIG = {
