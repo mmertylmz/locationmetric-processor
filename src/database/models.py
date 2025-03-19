@@ -39,7 +39,7 @@ class OutscraperLocation(Base):
 class OutscraperLocationMetric(Base):
     __tablename__ = "rmertDLMOutscraperLocationMetric"
 
-    Id = Column(UNIQUEIDENTIFIER, nullable = True)
+    Id = Column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
     LocationId = Column(UNIQUEIDENTIFIER, nullable=True)
     Rating = Column(DECIMAL(19,4), nullable = True)
     Reviews = Column(INTEGER, nullable=True)

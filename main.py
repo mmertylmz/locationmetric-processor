@@ -1,22 +1,24 @@
-import os
-from config import EXCEL_FOLDER, TARGET_COLUMNS
-from src.monitoring.monitor import FolderMonitor
-from src.utils.helpers import ensure_directory_exists
-
-
-def main():
-    if not ensure_directory_exists(EXCEL_FOLDER):
-        print(f"Error: Could not access or create the Excel folder: {EXCEL_FOLDER}")
-        return
-
-    monitor = FolderMonitor(EXCEL_FOLDER, TARGET_COLUMNS)
-    try:
-        monitor.start()
-    except Exception as e:
-        print(f"Error starting the monitor: {e}")
-    finally:
-        monitor.stop()
-
+import logging
+import sys
+from src.excel.processor import ExcelProcessor
+#from src.database import test_mssql_connection
+from config import TARGET_COLUMNS
 
 if __name__ == "__main__":
-    main()
+    processor = ExcelProcessor(batch_size=100)
+
+    logging.info("Program starting...")
+
+    #if not test_mssql_connection():
+     #   logging.error("Database connection failed! Exiting program.")
+      #  sys.exit(1)
+
+    logging.info("Starting to process Excel files...")
+    processed_count = processor.watch_folder()
+
+    if processed_count > 0:
+        logging.info(f"Processing completed. Total {processed_count} Excel files processed.")
+    else:
+        logging.info("No Excel files found to process.")
+
+    logging.info("Program completed.")
