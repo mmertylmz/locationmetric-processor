@@ -1,5 +1,3 @@
-EXCEL_FOLDER = "excel_files"
-
 TARGET_COLUMNS = [
     "name",
     "type",
@@ -23,3 +21,21 @@ TARGET_COLUMNS = [
     "google_id",
     "cid"
 ]
+
+DB_CONFIG = {
+    'driver': 'SQL Server',
+    'server': r'DESKTOP-RHIE06K\SQLEXPRESS',
+    'database': 'WR',
+    'trusted_connection': 'yes' # Windows Authentication
+}
+
+EXCEL_CONFIG = {
+    'watch_folder': './Excel Files',
+    'archive_folder': './Excel Files/Archives',
+}
+
+LOG_CONFIG = {
+    'log_folder': './Logs',
+    'log_level': 'INFO',
+}
+
