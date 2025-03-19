@@ -17,6 +17,7 @@ class ExcelProcessor:
     def setup_logging(self):
         from config import LOG_CONFIG
         import os
+        import sys
 
         log_folder = LOG_CONFIG['log_folder']
         if not os.path.exists(log_folder):
@@ -28,8 +29,8 @@ class ExcelProcessor:
             level=getattr(logging, LOG_CONFIG['log_level']),
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
+                logging.FileHandler(log_file, encoding='utf-8'),
+                logging.StreamHandler(sys.stdout)
             ]
         )
 
@@ -86,27 +87,58 @@ class ExcelProcessor:
             'metrics_added': 0
         }
 
+        def safe_numeric(value):
+            if value is None:
+                return None
+            if isinstance(value, (int, float)):
+                return value
+            if isinstance(value, str):
+                try:
+                    if '.' in value:
+                        return float(value)
+                    else:
+                        return int(value)
+                except ValueError:
+                    return None
+            return None
+
         try:
             for _, row in batch_df.iterrows():
                 google_id = row.get('google_id')
                 existing_location = None
 
                 if google_id:
-                    existing_location = session.query(OutscraperLocation).filter(
-                        OutscraperLocation.GoogleId == google_id
-                    ).first()
+                    with session.no_autoflush:
+                        existing_location = session.query(OutscraperLocation).filter(
+                            OutscraperLocation.GoogleId == google_id
+                        ).first()
+
+                rating = safe_numeric(row.get('rating'))
+                reviews = safe_numeric(row.get('reviews'))
+                reviews_per_score1 = safe_numeric(row.get('reviews_per_score_1'))
+                reviews_per_score2 = safe_numeric(row.get('reviews_per_score_2'))
+                reviews_per_score3 = safe_numeric(row.get('reviews_per_score_3'))
+                reviews_per_score4 = safe_numeric(row.get('reviews_per_score_4'))
+                reviews_per_score5 = safe_numeric(row.get('reviews_per_score_5'))
+                photos_count = safe_numeric(row.get('photos_count'))
+
+                latitude = safe_numeric(row.get('latitude'))
+                longitude = safe_numeric(row.get('longitude'))
+                postal_code = row.get('postal_code')
+                if isinstance(postal_code, (int, float)):
+                    postal_code = str(int(postal_code))
 
                 metric_id = uuid.uuid4()
                 metric = OutscraperLocationMetric(
                     Id=metric_id,
-                    Rating=row.get('rating'),
-                    Reviews=row.get('reviews'),
-                    ReviewsPerScore1=row.get('reviews_per_score_1'),
-                    ReviewsPerScore2=row.get('reviews_per_score_2'),
-                    ReviewsPerScore3=row.get('reviews_per_score_3'),
-                    ReviewsPerScore4=row.get('reviews_per_score_4'),
-                    ReviewsPerScore5=row.get('reviews_per_score_5'),
-                    PhotosCount=row.get('photos_count'),
+                    Rating=rating,
+                    Reviews=reviews,
+                    ReviewsPerScore1=reviews_per_score1,
+                    ReviewsPerScore2=reviews_per_score2,
+                    ReviewsPerScore3=reviews_per_score3,
+                    ReviewsPerScore4=reviews_per_score4,
+                    ReviewsPerScore5=reviews_per_score5,
+                    PhotosCount=photos_count,
                     CreateDate=datetime.utcnow()
                 )
                 session.add(metric)
@@ -118,10 +150,10 @@ class ExcelProcessor:
                     existing_location.Type = row.get('type', existing_location.Type)
                     existing_location.Phone = row.get('phone', existing_location.Phone)
                     existing_location.FullAddress = row.get('full_address', existing_location.FullAddress)
-                    existing_location.PostalCode = row.get('postal_code', existing_location.PostalCode)
+                    existing_location.PostalCode = postal_code
                     existing_location.State = row.get('state', existing_location.State)
-                    existing_location.Latitude = row.get('latitude', existing_location.Latitude)
-                    existing_location.Longitude = row.get('longitude', existing_location.Longitude)
+                    existing_location.Latitude = latitude
+                    existing_location.Longitude = longitude
                     existing_location.Verified = row.get('verified', existing_location.Verified)
                     existing_location.LocationLink = row.get('location_link', existing_location.LocationLink)
 
@@ -138,10 +170,10 @@ class ExcelProcessor:
                         Type=row.get('type'),
                         Phone=row.get('phone'),
                         FullAddress=row.get('full_address'),
-                        PostalCode=row.get('postal_code'),
+                        PostalCode=postal_code,
                         State=row.get('state'),
-                        Latitude=row.get('latitude'),
-                        Longitude=row.get('longitude'),
+                        Latitude=latitude,
+                        Longitude=longitude,
                         Verified=row.get('verified'),
                         LocationLink=row.get('location_link')
                     )

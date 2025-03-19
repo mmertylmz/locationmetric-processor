@@ -62,7 +62,7 @@ class OutscraperLocationMetric(Base):
                                primaryjoin="OutscraperLocationMetric.Id == OutscraperLocation.MetricId",
                                uselist=False,
                                foreign_keys=[OutscraperLocation.MetricId],
-                               overlaps="location,metrics")
+                               overlaps="location,metrics,latest_metric")
 
     def __repr__(self):
         return f"<OutscraperLocationMetric(Id={self.Id}, LocationId={self.LocationId}, Rating={self.Rating})>"
