@@ -50,21 +50,23 @@ class ExcelProcessor:
                 logging.warning(f"Missing columns in Excel: {missing_columns}")
 
             df = df[[col for col in TARGET_COLUMNS if col in df.columns]]
-
             df = clean_data_frame(df)
 
-            logging.info(f"File cleaned successfully: {file_path}, {len(df)} rows found.")
+            total_rows = len(df)
+            logging.info(f"File cleaned successfully: {file_path}, {total_rows} rows found.")
 
-            total_batches = (len(df) + self.batch_size - 1) // self.batch_size
+            total_batches = (total_rows + self.batch_size - 1) // self.batch_size
             locations_added = 0
             locations_updated = 0
             metrics_added = 0
             error_batches = 0
 
+            logging.info(f"Starting batch processing: 0/{total_batches} (0%)")
+            last_logged_percentage = 0
+
             for batch_num in range(total_batches):
                 start_idx = batch_num * self.batch_size
-                end_idx = min(start_idx + self.batch_size, len(df))
-
+                end_idx = min(start_idx + self.batch_size, total_rows)
                 batch_df = df.iloc[start_idx:end_idx]
 
                 try:
@@ -74,10 +76,12 @@ class ExcelProcessor:
                     locations_updated += batch_results.get('locations_updated', 0)
                     metrics_added += batch_results.get('metrics_added', 0)
 
-                    logging.info(f"Batch {batch_num + 1}/{total_batches} processed: " +
-                                 f"{batch_results.get('locations_added', 0)} locations added, " +
-                                 f"{batch_results.get('locations_updated', 0)} locations updated, " +
-                                 f"{batch_results.get('metrics_added', 0)} metrics added.")
+                    current_percentage = int((batch_num + 1) / total_batches * 100)
+
+                    if current_percentage - last_logged_percentage >= 25 or batch_num == total_batches - 1:
+                        logging.info(f"Progress: {batch_num + 1}/{total_batches} batches ({current_percentage}%)")
+                        last_logged_percentage = current_percentage
+
                 except Exception as e:
                     error_batches += 1
                     logging.error(f"Error processing batch {batch_num + 1}/{total_batches}: {e}")
@@ -86,7 +90,7 @@ class ExcelProcessor:
                 logging.warning(f"{error_batches} out of {total_batches} batches failed.")
 
             if error_batches < total_batches:
-                logging.info(f"File processed with some success: {file_path}")
+                logging.info(f"File processed with success: {file_path}")
                 logging.info(f"Total records: {locations_added} locations added, " +
                              f"{locations_updated} locations updated, {metrics_added} metrics added.")
 
@@ -243,7 +247,7 @@ class ExcelProcessor:
 
             try:
                 session.commit()
-                logging.info(f"Final commit successful for batch with {results['metrics_added']} metrics.")
+                #logging.info(f"Final commit successful for batch with {results['metrics_added']} metrics.")
             except SQLAlchemyError as commit_error:
                 session.rollback()
                 logging.error(f"Error during final commit: {commit_error}")
