@@ -41,7 +41,6 @@ class ExcelFileHandler(FileSystemEventHandler):
             logging.info(f"New Excel File detected: {file_path}")
 
             try:
-                # Fonksiyon referansını çağır
                 self.process_function(file_path)
             except Exception as e:
                 logging.error(f"Error processing file {file_path}: {e}")
@@ -54,17 +53,6 @@ class ExcelFileHandler(FileSystemEventHandler):
 
 
 def start_file_monitoring(watch_folder, process_function):
-    """
-    Starts monitoring the specified folder for Excel files
-    
-    Args:
-        watch_folder (str): Path to the folder to monitor
-        process_function (function): Function to process Excel files, 
-                                     should accept file_path as parameter
-    
-    Returns:
-        Observer: The watchdog observer instance
-    """
     event_handler = ExcelFileHandler(process_function)
     observer = Observer()
     observer.schedule(event_handler, watch_folder, recursive=False)

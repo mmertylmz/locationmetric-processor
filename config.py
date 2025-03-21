@@ -36,7 +36,7 @@ EXCEL_CONFIG = {
 }
 
 LOG_CONFIG = {
-    'log_folder': './Logs',
+    'log_folder': './logs',
     'log_level': 'INFO',
 }
 
