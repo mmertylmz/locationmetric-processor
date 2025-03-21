@@ -5,10 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from config import DB_CONFIG
 
 def get_connection_string(database_name="WR"):
-    if DB_CONFIG.get("trusted_connection").lower() == "yes":
-        return f"DRIVER={{{DB_CONFIG['driver']}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};Trusted_Connection=yes;"
-
-    return f"DRIVER={{{DB_CONFIG('driver')}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};UID={DB_CONFIG['username']};PWD={DB_CONFIG['password']};"
+    return f"DRIVER={{{DB_CONFIG['driver']}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};UID={DB_CONFIG['username']};PWD={DB_CONFIG['password']};"
 
 def create_connection():
     conn_str = get_connection_string("WR")

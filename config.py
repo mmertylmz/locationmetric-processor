@@ -26,7 +26,8 @@ DB_CONFIG = {
     'driver': 'SQL Server',
     'server': r'DESKTOP-RHIE06K\SQLEXPRESS',
     'database': 'WR',
-    'trusted_connection': 'yes' # Windows Authentication
+    'username': 'sa',
+    'password': '3568Mert!'
 }
 
 EXCEL_CONFIG = {
