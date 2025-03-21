@@ -22,30 +22,6 @@ TARGET_COLUMNS = [
     "cid"
 ]
 
-DTYPE_DICT = {
-    'name': str,
-    'type': str,
-    'phone': str,
-    'full_address': str,
-    'postal_code': str,
-    'state': str,
-    'latitude': float,
-    'longitude': float,
-    'rating': float,
-    'reviews': float,
-    'reviews_per_score_1': float,
-    'reviews_per_score_2': float,
-    'reviews_per_score_3': float,
-    'reviews_per_score_4': float,
-    'reviews_per_score_5': float,
-    'photos_count': int,
-    'verified': bool,
-    'location_link': str,
-    'place_id': str,
-    'google_id': str,
-    'cid': str
-}
-
 DB_CONFIG = {
     'driver': 'SQL Server',
     'server': r'DESKTOP-RHIE06K\SQLEXPRESS',

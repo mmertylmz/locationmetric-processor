@@ -14,13 +14,13 @@ def clean_data_frame(df, target_columns=None):
     try:
         string_columns = ['name', 'type', 'phone', 'full_address', 'state',
                           'location_link', 'place_id', 'google_id']
-
         for col in string_columns:
             if col in df.columns:
                 df[col] = df[col].fillna('')
                 df[col] = df[col].astype(str)
                 df[col] = df[col].replace(r'\.0$', '', regex=True)
                 df[col] = df[col].replace({'nan': '', 'None': '', 'NaN': ''})
+
 
         float_columns = ['latitude', 'longitude', 'rating']
         for col in float_columns:
@@ -31,10 +31,10 @@ def clean_data_frame(df, target_columns=None):
                     lambda x: 0.0 if not isinstance(x, (int, float)) or pd.isna(x) else float(x))
                 df[col] = df[col].astype(float)
 
+
         int_columns = ['reviews', 'reviews_per_score_1', 'reviews_per_score_2',
                        'reviews_per_score_3', 'reviews_per_score_4',
                        'reviews_per_score_5', 'photos_count', 'cid']
-
         for col in int_columns:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')

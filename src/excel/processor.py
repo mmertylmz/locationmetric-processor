@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from ..database.database import get_session
 from ..database.models import OutscraperLocation, OutscraperLocationMetric
-from config import EXCEL_CONFIG, TARGET_COLUMNS, DTYPE_DICT
+from config import EXCEL_CONFIG, TARGET_COLUMNS
 from ..utils.helpers import ensure_directory_exists, clean_data_frame
 
 class ExcelProcessor:
@@ -36,14 +36,7 @@ class ExcelProcessor:
     def process_file(self, file_path):
         try:
             logging.info(f"Processing file: {file_path}")
-
-            try:
-                df = pd.read_excel(file_path, dtype=DTYPE_DICT)
-                logging.info(f"File read with specified data types")
-            except Exception as e:
-                logging.warning(f"Error reading with specified data types: {e}. Trying without data types...")
-                df = pd.read_excel(file_path)
-                logging.info("File read with default data types")
+            df = pd.read_excel(file_path)
 
             missing_columns = [col for col in TARGET_COLUMNS if col not in df.columns]
             if missing_columns:
