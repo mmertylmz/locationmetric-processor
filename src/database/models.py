@@ -1,18 +1,22 @@
-import time
 import uuid
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Text, Numeric
-from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER, NVARCHAR, NTEXT, BIT, DATETIMEOFFSET, INTEGER, DECIMAL, BIGINT
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER, NVARCHAR, NTEXT, BIT, DATETIMEOFFSET, INTEGER, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 import datetime
 
+from ..configurations.config import DB_CONFIG
+
 Base = declarative_base()
 
+main_table = DB_CONFIG['main_table']
+metric_table = DB_CONFIG['metric_table']
+
 class OutscraperLocation(Base):
-    __tablename__ = "rdlmDLMOutscraperLocation"
+    __tablename__ = main_table
 
     Id = Column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
-    MetricId = Column(UNIQUEIDENTIFIER, ForeignKey("rdlmDLMOutscraperLocationMetric.Id"), nullable=True)
+    MetricId = Column(UNIQUEIDENTIFIER, ForeignKey(f"{metric_table}.Id"), nullable=True)
     PlaceId = Column(NVARCHAR(255), nullable=True)
     GoogleId = Column(NVARCHAR(255), nullable=True)
     Name = Column(NVARCHAR(1000), nullable=True)
@@ -42,10 +46,10 @@ class OutscraperLocation(Base):
         return f"<OutscraperLocation(Id={self.Id}, Name={self.Name})>"
 
 class OutscraperLocationMetric(Base):
-    __tablename__ = "rdlmDLMOutscraperLocationMetric"
+    __tablename__ = metric_table
 
     Id = Column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
-    LocationId = Column(UNIQUEIDENTIFIER, ForeignKey("rdlmDLMOutscraperLocation.Id"), nullable=True)
+    LocationId = Column(UNIQUEIDENTIFIER, ForeignKey(f"{main_table}.Id"), nullable=True)
     Rating = Column(DECIMAL(19,4), nullable = True)
     Reviews = Column(INTEGER, nullable=True)
     ReviewsPerScore1 = Column(INTEGER, nullable=True)
