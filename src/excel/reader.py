@@ -1,5 +1,5 @@
 import pandas as pd
-from config import TARGET_COLUMNS
+from ..configurations.config import TARGET_COLUMNS
 
 class ExcelReader:
     @staticmethod

@@ -1,12 +1,12 @@
 import pyodbc
-from config import DB_CONFIG
+from ..configurations.config import DB_CONFIG
 
-def get_connection_string(database_name="DLM_Repo"):
+def get_connection_string():
     return f"DRIVER={{{DB_CONFIG['driver']}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};UID={DB_CONFIG['username']};PWD={DB_CONFIG['password']};"
 
 def test_mssql_connection():
-    connection_string = get_connection_string("DLM_Repo")
-
+    connection_string = get_connection_string()
+    #print(connection_string)
     try:
         conn = pyodbc.connect(connection_string)
 

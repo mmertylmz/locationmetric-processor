@@ -2,14 +2,14 @@ import pyodbc
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from config import DB_CONFIG
+from ..configurations.config import DB_CONFIG
 
-def get_connection_string(database_name="DLM_Repo"):
+def get_connection_string():
     return f"DRIVER={{{DB_CONFIG['driver']}}};SERVER={DB_CONFIG['server']};DATABASE={DB_CONFIG['database']};UID={DB_CONFIG['username']};PWD={DB_CONFIG['password']};"
     
 
 def create_connection():
-    conn_str = get_connection_string("DLM_Repo")
+    conn_str = get_connection_string()
     try:
         conn = pyodbc.connect(conn_str)
         return conn
@@ -18,7 +18,7 @@ def create_connection():
         return None
 
 def get_engine():
-    conn_str = get_connection_string("DLM_Repo")
+    conn_str = get_connection_string()
     connection_url = f"mssql+pyodbc:///?odbc_connect={conn_str}"
 
     return create_engine(

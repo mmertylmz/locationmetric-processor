@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from ..database.database import get_session
 from ..database.models import OutscraperLocation, OutscraperLocationMetric
-from config import EXCEL_CONFIG, TARGET_COLUMNS
+from ..configurations.config import EXCEL_CONFIG, TARGET_COLUMNS
 from ..utils.helpers import ensure_directory_exists, clean_data_frame
 
 class ExcelProcessor:
@@ -15,7 +15,7 @@ class ExcelProcessor:
         self.setup_logging()
 
     def setup_logging(self):
-        from config import LOG_CONFIG
+        from src.configurations.config import LOG_CONFIG
         import os
         import sys
 

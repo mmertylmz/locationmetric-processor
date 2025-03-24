@@ -5,7 +5,7 @@ import os
 import signal
 from src.excel.processor import ExcelProcessor
 from src.monitoring.file_watcher import start_file_monitoring
-from config import EXCEL_CONFIG
+from src.configurations.config import EXCEL_CONFIG
 from src.database.test_mssql_connection import test_mssql_connection
 
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
