@@ -2,12 +2,13 @@ import pandas as pd
 import os
 import uuid
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
 from ..database.database import get_session
 from ..database.models import OutscraperLocation, OutscraperLocationMetric
 from ..configurations.config import EXCEL_CONFIG, TARGET_COLUMNS
 from ..utils.helpers import ensure_directory_exists, clean_data_frame
+from collections import defaultdict
 
 class ExcelProcessor:
     def __init__(self, batch_size=100):
@@ -164,6 +165,7 @@ class ExcelProcessor:
                     time_zone = str(row.get('time_zone', ''))
 
                     metric_id = uuid.uuid4()
+                    current_date = datetime.now().replace(tzinfo=timezone.utc)
                     metric = OutscraperLocationMetric(
                         Id=metric_id,
                         Rating=rating,
@@ -174,7 +176,9 @@ class ExcelProcessor:
                         ReviewsPerScore4=reviews_per_score4,
                         ReviewsPerScore5=reviews_per_score5,
                         PhotosCount=photos_count,
-                        CreateDate=datetime.utcnow()
+                        CreateDate=current_date,
+                        Year=current_date.year,
+                        Month=current_date.month
                     )
                     session.add(metric)
                     results['metrics_added'] += 1
@@ -243,8 +247,18 @@ class ExcelProcessor:
                         results['locations_added'] += 1
 
                 except Exception as row_error:
-                    logging.error(f"Error processing row: {row_error}")
+                    if not hasattr(self, '_error_counts'):
+                        self._error_counts = defaultdict(int)
+                    error_msg = str(row_error)
+                    self._error_counts[error_msg] += 1
+                    
+                    if self._error_counts[error_msg] <= 3:
+                        logging.error(f"Error processing row: {error_msg}")
+                    elif self._error_counts[error_msg] == 4:
+                        logging.error(f"Error processing row: {error_msg} (suppressing further identical errors)")
+                
                     session.rollback()
+
                 if results['metrics_added'] % 10 == 0:
                     try:
                         session.commit()

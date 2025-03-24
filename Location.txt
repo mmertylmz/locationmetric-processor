@@ -32,6 +32,6 @@ LocationMetric
 - ReviewsPerScore5 (Int)
 - PhotosCount (Int)
 - CreateDate (DateTime)
-- CreateYear (Int)
-- CreateMonth (Int)
+- Year (Int)
+- Month (Int)
 

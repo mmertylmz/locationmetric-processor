@@ -59,6 +59,8 @@ class OutscraperLocationMetric(Base):
     ReviewsPerScore5 = Column(INTEGER, nullable=True)
     PhotosCount = Column(INTEGER, nullable=True)
     CreateDate = Column(DATETIMEOFFSET(7), nullable=True, default = datetime.datetime.utcnow)
+    Year = Column(INTEGER, nullable=True)
+    Month = Column(INTEGER, nullable=True)
 
     location = relationship("OutscraperLocation",
                           primaryjoin="OutscraperLocationMetric.LocationId == OutscraperLocation.Id",
