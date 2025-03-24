@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER, NVARCHAR, NTEXT, BIT, DATETIMEOFFSET, INTEGER, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-import datetime
+from datetime import datetime, timezone
 
 from ..configurations.config import DB_CONFIG
 
@@ -58,7 +58,7 @@ class OutscraperLocationMetric(Base):
     ReviewsPerScore4 = Column(INTEGER, nullable=True)
     ReviewsPerScore5 = Column(INTEGER, nullable=True)
     PhotosCount = Column(INTEGER, nullable=True)
-    CreateDate = Column(DATETIMEOFFSET(7), nullable=True, default = datetime.datetime.utcnow)
+    CreateDate = Column(DATETIMEOFFSET(7), nullable=True, default = datetime.now().replace(tzinfo=timezone.utc))
     Year = Column(INTEGER, nullable=True)
     Month = Column(INTEGER, nullable=True)
 
