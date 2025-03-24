@@ -1,0 +1,37 @@
+Location
+- Id
+- MetricId (1-1)
+- PlaceId
+- GoogleId
+- CId
+- Name (1000)
+- Type (255)
+- Phone (255)
+- FullAddress (4000)
+- PostalCode (10)
+- State (255)
+- Latitude (Float)
+- Longitude (Float)
+- Verified (True-False)
+- LocationLink(Unlimited)
+- Country (255)
+- CountryCode (10)
+- Timezone (255)
+
+
+
+LocationMetric
+- Id
+- LocationId (1-Many)
+- Rating (Float)
+- Reviews (Int)
+- ReviewsPerScore1 (Int)
+- ReviewsPerScore2 (Int)
+- ReviewsPerScore3 (Int)
+- ReviewsPerScore4 (Int)
+- ReviewsPerScore5 (Int)
+- PhotosCount (Int)
+- CreateDate (DateTime)
+- CreateYear (Int)
+- CreateMonth (Int)
+
