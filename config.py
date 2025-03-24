@@ -19,7 +19,10 @@ TARGET_COLUMNS = [
     "location_link",
     "place_id",
     "google_id",
-    "cid"
+    "cid",
+    "country",
+    "country_code",
+    "time_zone"
 ]
 
 DB_CONFIG = {
