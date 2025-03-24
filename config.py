@@ -24,15 +24,15 @@ TARGET_COLUMNS = [
 
 DB_CONFIG = {
     'driver': 'SQL Server',
-    'server': r'DESKTOP-RHIE06K\SQLEXPRESS',
-    'database': 'WR',
-    'username': 'sa',
-    'password': '3568Mert!'
+    'server': r'SP-GRCRUNNER',
+    'database': 'DLM_Repo',
+    'username': 'outscraper',
+    'password': 'QgCXlMgd_I'
 }
 
 EXCEL_CONFIG = {
-    'watch_folder': './excel_files',
-    'archive_folder': './excel_files/archives',
+    'watch_folder': 'C:/WORKRUNNER/ExcelData',
+    'archive_folder': 'C:/WORKRUNNER/ExcelData/Archive',
 }
 
 LOG_CONFIG = {

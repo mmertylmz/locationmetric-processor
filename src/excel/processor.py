@@ -22,7 +22,7 @@ class ExcelProcessor:
         log_folder = LOG_CONFIG['log_folder']
         ensure_directory_exists(log_folder)
 
-        log_file = os.path.join(log_folder, f"{datetime.now().strftime('%Y-%m-%d')}.log")
+        log_file = os.path.join(log_folder, "application.log")
 
         logging.basicConfig(
             level=getattr(logging, LOG_CONFIG['log_level']),

@@ -9,10 +9,10 @@ import datetime
 Base = declarative_base()
 
 class OutscraperLocation(Base):
-    __tablename__ = "rmertDLMOutscraperLocation"
+    __tablename__ = "rdlmDLMOutscraperLocation"
 
     Id = Column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
-    MetricId = Column(UNIQUEIDENTIFIER, ForeignKey("rmertDLMOutscraperLocationMetric.Id"), nullable=True)
+    MetricId = Column(UNIQUEIDENTIFIER, ForeignKey("rdlmDLMOutscraperLocationMetric.Id"), nullable=True)
     PlaceId = Column(NVARCHAR(255), nullable=True)
     GoogleId = Column(NVARCHAR(255), nullable=True)
     Name = Column(NVARCHAR(1000), nullable=True)
@@ -39,10 +39,10 @@ class OutscraperLocation(Base):
         return f"<OutscraperLocation(Id={self.Id}, Name={self.Name})>"
 
 class OutscraperLocationMetric(Base):
-    __tablename__ = "rmertDLMOutscraperLocationMetric"
+    __tablename__ = "rdlmDLMOutscraperLocationMetric"
 
     Id = Column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
-    LocationId = Column(UNIQUEIDENTIFIER, ForeignKey("rmertDLMOutscraperLocation.Id"), nullable=True)
+    LocationId = Column(UNIQUEIDENTIFIER, ForeignKey("rdlmDLMOutscraperLocation.Id"), nullable=True)
     Rating = Column(DECIMAL(19,4), nullable = True)
     Reviews = Column(INTEGER, nullable=True)
     ReviewsPerScore1 = Column(INTEGER, nullable=True)

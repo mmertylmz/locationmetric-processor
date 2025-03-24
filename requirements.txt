@@ -4,3 +4,4 @@ sqlalchemy
 pyodbc
 watchdog
 uuid
+openpyxl
