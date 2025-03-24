@@ -13,7 +13,7 @@ def get_timestamp():
 def clean_data_frame(df, target_columns=None):
     try:
         string_columns = ['name', 'type', 'phone', 'full_address', 'state',
-                          'location_link', 'place_id', 'google_id']
+                          'location_link', 'place_id', 'google_id', 'country', 'country_code', 'time_zone']
         for col in string_columns:
             if col in df.columns:
                 df[col] = df[col].fillna('')

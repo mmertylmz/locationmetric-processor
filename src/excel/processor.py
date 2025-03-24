@@ -159,6 +159,9 @@ class ExcelProcessor:
                     location_link = str(row.get('location_link', ''))
                     place_id = str(row.get('place_id', ''))
                     verified = bool(row.get('verified', False))
+                    country = str(row.get('country', ''))
+                    country_code = str(row.get('country_code', ''))
+                    time_zone = str(row.get('time_zone', ''))
 
                     metric_id = uuid.uuid4()
                     metric = OutscraperLocationMetric(
@@ -202,6 +205,15 @@ class ExcelProcessor:
                         if location_link.strip():
                             existing_location.LocationLink = location_link
 
+                        if country.strip():
+                            existing_location.Country = country
+
+                        if country_code.strip():
+                            existing_location.CountryCode = country_code
+                        
+                        if time_zone.strip():
+                            existing_location.Timezone = time_zone
+
                         metric.LocationId = existing_location.Id
                         results['locations_updated'] += 1
                     else:
@@ -220,7 +232,10 @@ class ExcelProcessor:
                             Latitude=latitude,
                             Longitude=longitude,
                             Verified=verified,
-                            LocationLink=location_link
+                            LocationLink=location_link,
+                            Country = country,
+                            CountryCode = country_code,
+                            Timezone = time_zone
                         )
                         session.add(location)
 

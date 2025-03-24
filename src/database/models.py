@@ -25,6 +25,9 @@ class OutscraperLocation(Base):
     Longitude = Column(DECIMAL(19,4), nullable=True)
     Verified = Column(BIT, nullable=True)
     LocationLink = Column(NTEXT, nullable=True)
+    Country = Column(NVARCHAR(255), nullable=True)
+    CountryCode = Column(NVARCHAR(10), nullable=True)
+    Timezone = Column(NVARCHAR(255), nullable=True)
 
     metrics = relationship("OutscraperLocationMetric",
                           primaryjoin="OutscraperLocation.Id == OutscraperLocationMetric.LocationId",
