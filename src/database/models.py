@@ -3,6 +3,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER, NVARCHAR, NTEXT, BIT, DATETIMEOFFSET, INTEGER, DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy import text
 from datetime import datetime, timezone
 
 from ..configurations.config import DB_CONFIG
@@ -42,6 +43,13 @@ class OutscraperLocation(Base):
                                primaryjoin="OutscraperLocation.MetricId == OutscraperLocationMetric.Id",
                                uselist=False,
                                foreign_keys=[MetricId])
+    
+    
+    @classmethod
+    def find_by_google_id(cls, session, google_id):
+        return session.query(cls).from_statement(
+            text("SELECT * FROM " + main_table + " WITH (NOLOCK) WHERE GoogleId = :google_id")
+        ).params(google_id=google_id).first()
 
     def __repr__(self):
         return f"<OutscraperLocation(Id={self.Id}, Name={self.Name})>"

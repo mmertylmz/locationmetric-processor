@@ -2,17 +2,19 @@ import pandas as pd
 import os
 import uuid
 import logging
+import concurrent.futures
 from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
-from ..database.database import get_session
+from ..database.database import get_session, execute_with_retry
 from ..database.models import OutscraperLocation, OutscraperLocationMetric
 from ..configurations.config import EXCEL_CONFIG, TARGET_COLUMNS
 from ..utils.helpers import ensure_directory_exists, clean_data_frame
 from collections import defaultdict
 
 class ExcelProcessor:
-    def __init__(self, batch_size=100):
+    def __init__(self, batch_size=50, max_workers=4):
         self.batch_size = batch_size
+        self.max_workers = max_workers
         self.setup_logging()
 
     def setup_logging(self):
@@ -33,6 +35,7 @@ class ExcelProcessor:
                 logging.StreamHandler(sys.stdout)
             ]
         )
+
 
     def process_file(self, file_path):
         try:
@@ -57,33 +60,42 @@ class ExcelProcessor:
             metrics_added = 0
             error_batches = 0
 
-            logging.info(f"Starting batch processing: 0/{total_batches} (0%)")
-            last_logged_percentage = 0
-
+            logging.info(f"Starting batch processing with {self.max_workers} worker threads: 0/{total_batches} (0%)")
+            batches = []
             for batch_num in range(total_batches):
                 start_idx = batch_num * self.batch_size
                 end_idx = min(start_idx + self.batch_size, total_rows)
-                batch_df = df.iloc[start_idx:end_idx]
+                batches.append(df.iloc[start_idx:end_idx])
 
-                try:
-                    batch_results = self._process_batch(batch_df)
+            batch_results = []
+            completed = 0
+            last_logged_percentage = 0
 
-                    locations_added += batch_results.get('locations_added', 0)
-                    locations_updated += batch_results.get('locations_updated', 0)
-                    metrics_added += batch_results.get('metrics_added', 0)
-                    types_added += batch_results.get('types_added', 0)
-                    types_updated += batch_results.get('types_updated', 0)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                future_to_batch = {executor.submit(self._process_batch, batch) : i for i, batch in enumerate(batches)}
 
-                    current_percentage = int((batch_num + 1) / total_batches * 100)
+                for future in concurrent.futures.as_completed(future_to_batch):
+                    batch_num = future_to_batch[future]
+                    completed += 1
 
-                    if current_percentage - last_logged_percentage >= 25 or batch_num == total_batches - 1:
-                        logging.info(f"Progress: {batch_num + 1}/{total_batches} batches ({current_percentage}%)")
-                        last_logged_percentage = current_percentage
+                    try:
+                        result = future.result()
+                        batch_results.append(result)
 
-                except Exception as e:
-                    error_batches += 1
-                    logging.error(f"Error processing batch {batch_num + 1}/{total_batches}: {e}")
+                        locations_added += result.get('locations_added', 0)
+                        locations_updated += result.get('locations_updated', 0)
+                        metrics_added += result.get('metrics_added', 0)
+                        types_added += result.get('types_added', 0)
+                        types_updated += result.get('types_updated', 0)
 
+                        current_percentage = int(completed / total_batches * 100)
+                        if current_percentage - last_logged_percentage >= 10 or completed == total_batches:
+                            logging.info(f"Progress: {completed}/{total_batches} batches ({current_percentage}%)")
+                            last_logged_percentage = current_percentage
+                    except Exception as e:
+                        error_batches += 1
+                        logging.error(f"Error processing batch {batch_num + 1}/{total_batches}: {e}")
+            
             if error_batches > 0:
                 logging.warning(f"{error_batches} out of {total_batches} batches failed.")
 
@@ -149,9 +161,7 @@ class ExcelProcessor:
 
                     if google_id and str(google_id).strip() not in ('', 'nan', 'None'):
                         with session.no_autoflush:
-                            existing_location = session.query(OutscraperLocation).filter(
-                                OutscraperLocation.GoogleId == google_id
-                            ).first()
+                            existing_location = OutscraperLocation.find_by_google_id(session, google_id)
 
                     try:
                         rating = float(row.get('rating', 0.0))
@@ -294,7 +304,7 @@ class ExcelProcessor:
                 
                     session.rollback()
 
-                if results['metrics_added'] % 10 == 0:
+                if results['metrics_added'] % 50 == 0:
                     try:
                         session.commit()
                         logging.debug(f"Intermediate commit successful after {results['metrics_added']} metrics added.")
@@ -303,7 +313,8 @@ class ExcelProcessor:
                         logging.error(f"Error during intermediate commit: {commit_error}")
 
             try:
-                session.commit()
+                # Commit changes with retry logic
+                execute_with_retry(session, lambda s: s.commit())
                 #logging.info(f"Final commit successful for batch with {results['metrics_added']} metrics.")
             except SQLAlchemyError as commit_error:
                 session.rollback()
