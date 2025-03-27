@@ -11,6 +11,7 @@ Base = declarative_base()
 
 main_table = DB_CONFIG['main_table']
 metric_table = DB_CONFIG['metric_table']
+type_table = DB_CONFIG['type_table']
 
 class OutscraperLocation(Base):
     __tablename__ = main_table
@@ -75,3 +76,9 @@ class OutscraperLocationMetric(Base):
 
     def __repr__(self):
         return f"<OutscraperLocationMetric(Id={self.Id}, LocationId={self.LocationId}, Rating={self.Rating})>"
+    
+class OutscraperLocationTypes(Base):
+    __tablename__ = type_table
+
+    Id = Column(UNIQUEIDENTIFIER, primary_key=True, default=uuid.uuid4)
+    Name = Column(NVARCHAR(255), nullable=True)

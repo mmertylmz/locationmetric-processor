@@ -52,6 +52,8 @@ class ExcelProcessor:
             total_batches = (total_rows + self.batch_size - 1) // self.batch_size
             locations_added = 0
             locations_updated = 0
+            types_added = 0
+            types_updated = 0
             metrics_added = 0
             error_batches = 0
 
@@ -69,6 +71,8 @@ class ExcelProcessor:
                     locations_added += batch_results.get('locations_added', 0)
                     locations_updated += batch_results.get('locations_updated', 0)
                     metrics_added += batch_results.get('metrics_added', 0)
+                    types_added += batch_results.get('types_added', 0)
+                    types_updated += batch_results.get('types_updated', 0)
 
                     current_percentage = int((batch_num + 1) / total_batches * 100)
 
@@ -86,7 +90,8 @@ class ExcelProcessor:
             if error_batches < total_batches:
                 logging.info(f"File processed with success: {file_path}")
                 logging.info(f"Total records: {locations_added} locations added, " +
-                             f"{locations_updated} locations updated, {metrics_added} metrics added.")
+                             f"{locations_updated} locations updated, {metrics_added} metrics added, " +
+                             f"{types_added} types added, {types_updated} types updated.")
 
                 self.move_processed_file(file_path)
                 return True
@@ -103,10 +108,40 @@ class ExcelProcessor:
         results = {
             'locations_added': 0,
             'locations_updated': 0,
-            'metrics_added': 0
+            'metrics_added': 0,
+            'types_added': 0,
+            'types_updated': 0
         }
 
         try:
+            unique_types = set()
+            for _, row in batch_df.iterrows():
+                type_value = str(row.get('type', '')).strip()
+                if type_value and type_value.lower() not in ('nan', 'none', ''):
+                    unique_types.add(type_value)
+
+            existing_types = {}
+            if unique_types:
+                from ..database.models import OutscraperLocationTypes
+                db_types = session.query(OutscraperLocationTypes).filter(
+                    OutscraperLocationTypes.Name.in_(unique_types)
+                ).all()
+
+                for type_obj in db_types:
+                    existing_types[type_obj.Name] = type_obj
+
+                for type_name in unique_types:
+                    if type_name not in existing_types:
+                        new_type = OutscraperLocationTypes(
+                            Id=uuid.uuid4(),
+                            Name=type_name
+                            )
+                        session.add(new_type)
+                        existing_types[type_name] = new_type
+                        results['types_added'] += 1
+                    else:
+                        results['types_updated'] += 1
+
             for _, row in batch_df.iterrows():
                 try:
                     google_id = row.get('google_id')
