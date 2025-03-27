@@ -52,6 +52,7 @@ def clean_data_frame(df, target_columns=None):
             df['postal_code'] = df['postal_code'].astype(str)
             df['postal_code'] = df['postal_code'].replace(r'\.0$', '', regex=True)
             df['postal_code'] = df['postal_code'].replace({'nan': '', 'None': '', 'NaN': ''})
+            df['postal_code'] = df['postal_code'].str[:25]
 
         return df
 

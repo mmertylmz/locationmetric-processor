@@ -8,7 +8,7 @@ Location
 - Type (255)
 - Phone (255)
 - FullAddress (4000)
-- PostalCode (10)
+- PostalCode (25)
 - State (255)
 - Latitude (Float)
 - Longitude (Float)
