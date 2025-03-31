@@ -45,14 +45,15 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Geçici dosyalar
+
 *.log
 *.tmp
 *.temp
 
-# Data dosyaları
 *.csv
 *.xlsx
 *.xls
 *.db
 *.sqlite3
+
+.env
